@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shortcut Filter Mutasi Anime</title>
+    <!-- Mengimpor Font yang cute/serasi dengan tema anime -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #ff7eb3;
+            --secondary: #ff758c;
+            --accent: #7afcff;
+            --dark-bg: #2d1b2e;
+            --glass: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --text-color: #ffffff;
+            --shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: radial-gradient(circle at 50% 120%, #4a1c40, #2d1b2e, #1a0b1c);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+            color: var(--text-color);
+            perspective: 1000px; /* Untuk efek 3D */
+        }
+
+        /* Latar Belakang Animasi Partikel Sederhana */
+        .bg-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background-image: 
+                radial-gradient(var(--glass) 1px, transparent 1px),
+                radial-gradient(var(--glass) 1px, transparent 1px);
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
+            opacity: 0.3;
+            animation: moveBackground 20s linear infinite;
+        }
+
+        @keyframes moveBackground {
+            0% { background-position: 0 0, 10px 10px; }
+            100% { background-position: 50px 50px, 60px 60px; }
+        }
+
+        /* Container Utama dengan Efek 3D */
+        .card-container {
+            width: 90%;
+            max-width: 800px;
+            background: rgba(45, 27, 46, 0.7);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            transform-style: preserve-3d;
+            transform: rotateX(2deg);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+        }
+
+        .card-container:hover {
+            transform: rotateX(0deg) translateY(-5px);
+            box-shadow: 0 15px 40px rgba(255, 117, 140, 0.3);
+        }
+
+        /* Elemen Dekoratif 3D */
+        .decoration {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            border-radius: 50%;
+            z-index: -1;
+            filter: blur(40px);
+            opacity: 0.6;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .dec-1 { top: -20px; left: -20px; }
+        .dec-2 { bottom: -20px; right: -20px; background: linear-gradient(45deg, var(--accent), #2193b0); animation-delay: 1s; }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(10px, 20px); }
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+            transform: translateZ(30px); /* Pop out effect */
+        }
+
+        h1 {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 2.5rem;
+            background: linear-gradient(to right, #fff, var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            letter-spacing: 1px;
+        }
+
+        p.subtitle {
+            color: rgba(255,255,255,0.7);
+            margin-top: 0.5rem;
+        }
+
+        /* Input Area */
+        .input-group {
+            margin-bottom: 1.5rem;
+            transform: translateZ(20px);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+            color: var(--accent);
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        textarea {
+            width: 100%;
+            height: 150px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 1rem;
+            color: #fff;
+            font-family: 'Nunito', sans-serif;
+            font-size: 1rem;
+            resize: vertical;
+            transition: all 0.3s ease;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 15px rgba(255, 126, 179, 0.3);
+        }
+
+        /* Tombol 3D */
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            transform: translateZ(25px);
+            justify-content: center;
+        }
+
+        button {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 50px;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.1s ease;
+            position: relative;
+            top: 0;
+        }
+
+        .btn-process {
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            color: white;
+            box-shadow: 0 5px 0 #c45a7a, 0 10px 10px rgba(0,0,0,0.3);
+        }
+
+        .btn-process:active {
+            top: 5px;
+            box-shadow: 0 0 0 #c45a7a, 0 0 5px rgba(0,0,0,0.3);
+        }
+
+        .btn-copy {
+            background: linear-gradient(45deg, #00f260, #0575E6);
+            color: white;
+            box-shadow: 0 5px 0 #044e94, 0 10px 10px rgba(0,0,0,0.3);
+            display: none; /* Hidden by default */
+        }
+
+        .btn-copy:active {
+            top: 5px;
+            box-shadow: 0 0 0 #044e94, 0 0 5px rgba(0,0,0,0.3);
+        }
+
+        /* Tabel Hasil */
+        .result-container {
+            transform: translateZ(15px);
+            display: none; /* Hidden by default */
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        thead {
+            background: rgba(255, 126, 179, 0.2);
+        }
+
+        th, td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        th {
+            font-family: 'Fredoka', sans-serif;
+            color: var(--accent);
+            text-transform: uppercase;
+            font-size: 0.9rem;
+        }
+
+        tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        td {
+            font-weight: 600;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #fff;
+            color: #333;
+            padding: 12px 24px;
+            border-radius: 50px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            font-weight: bold;
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .toast-icon {
+            color: #00f260;
+            font-size: 1.2rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .card-container {
+                width: 95%;
+                padding: 1.5rem;
+            }
+            h1 { font-size: 1.8rem; }
+            .btn-group { flex-direction: column; }
+            button { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-particles"></div>
+
+    <div class="card-container">
+        <!-- Dekorasi Background -->
+        <div class="decoration dec-1"></div>
+        <div class="decoration dec-2"></div>
+
+        <header>
+            <h1>Mutasi Filter 3D</h1>
+            <p class="subtitle">Paste mutasi & otomatis pisahkan Nama & Nominal</p>
+        </header>
+
+        <div class="input-group">
+            <label for="inputText">Tempel Teks Mutasi Di Sini:</label>
+            <textarea id="inputText" placeholder="Contoh: WAKAM 40.000 atau Rp40.000 telah diterima dari WAKAM..."></textarea>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn-process" onclick="processMutation()">✨ Proses Shortcut</button>
+        </div>
+
+        <div id="resultArea" class="result-container">
+            <div class="table-wrapper">
+                <table id="resultTable">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Nama Pengirim</th>
+                            <th>Nominal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Baris akan ditambahkan via JS -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="btn-group" style="margin-top: 1.5rem;">
+                <button class="btn-copy" id="copyBtn" onclick="copyToClipboard()">📋 Salin Hasil Tabel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <span class="toast-icon">✔</span>
+        <span id="toastMessage">Berhasil disalin!</span>
+    </div>
+
+    <script>
+        // Fungsi Utama untuk Memproses Teks
+        function processMutation() {
+            const input = document.getElementById('inputText').value;
+            const tbody = document.querySelector('#resultTable tbody');
+            const resultArea = document.getElementById('resultArea');
+            const copyBtn = document.getElementById('copyBtn');
+
+            // Reset tabel
+            tbody.innerHTML = '';
+
+            if (!input.trim()) {
+                showToast("⚠️ Mohon tempel teks mutasi terlebih dahulu!", "#ff7eb3");
+                return;
+            }
+
+            // Logika Parsing
+            // Kita menggunakan Map untuk memastikan tidak ada duplikat (Key: Nama, Value: Nominal)
+            const uniqueResults = new Map();
+            const lines = input.split('\n');
+
+            // Pola Regex:
+            // 1. "Rp" diikuti angka (dengan titik atau koma) -> Untuk Nominal
+            // 2. "diterima dari [NAMA]" -> Untuk Nama
+            // 3. Pola sederhana "NAMA NOMINAL" (di awal baris)
+
+            const regexAmount = /Rp\s?([\d\.]+)/i; // Mencari Rp40.000
+            const regexNameSentence = /(?:diterima\s+dari|transfer\s+dari)\s+([A-Z\s]+?)(?:\s+dengan|\s+di|\s|$)/i; 
+            const regexSimple = /^([A-Z0-9]+)\s+([\d\.]+)$/; // Pola "WAKAM 40.000"
+
+            lines.forEach(line => {
+                line = line.trim();
+                if (!line) return;
+
+                // Cek Pola Sederhana (Contoh baris pertama user: "WAKAM 40.000")
+                const matchSimple = line.match(regexSimple);
+                if (matchSimple) {
+                    const name = matchSimple[1];
+                    const amount = matchSimple[2];
+                    // Format nominal agar rapi (tambahkan Rp jika belum ada)
+                    const formattedAmount = "Rp " + amount;
+                    uniqueResults.set(name, formattedAmount);
+                }
+
+                // Cek Pola Kalimat Bank (Contoh: "Rp40.000 telah diterima dari WAKAM...")
+                const matchAmount = line.match(regexAmount);
+                const matchName = line.match(regexNameSentence);
+
+                if (matchAmount && matchName) {
+                    let rawName = matchName[1].trim();
+                    let rawAmount = matchAmount[1]; // Ambil angka saja
+                    
+                    // Bersihkan nama (hapus spasi berlebih atau sumber kata yang tidak perlu)
+                    // Batasi hanya mengambil kata pertama sebagai nama biasanya lebih aman untuk mutasi
+                    rawName = rawName.split(' ')[0]; 
+
+                    const formattedAmount = "Rp " + rawAmount;
+                    uniqueResults.set(rawName, formattedAmount);
+                }
+            });
+
+            // Render ke Tabel
+            if (uniqueResults.size > 0) {
+                let index = 1;
+                uniqueResults.forEach((amount, name) => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${index}</td>
+                        <td style="color: var(--accent);">${name}</td>
+                        <td style="color: #fff;">${amount}</td>
+                    `;
+                    tbody.appendChild(row);
+                    index++;
+                });
+
+                // Tampilkan area hasil dan tombol salin
+                resultArea.style.display = 'block';
+                copyBtn.style.display = 'block';
+                
+                // Scroll sedikit ke hasil
+                resultArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            } else {
+                showToast("❌ Tidak ditemukan pola mutasi yang sesuai.", "#ff758c");
+                resultArea.style.display = 'none';
+            }
+        }
+
+        // Fungsi Menyalin ke Clipboard
+        function copyToClipboard() {
+            const table = document.getElementById('resultTable');
+            let outputText = "";
+            
+            // Ambil semua baris kecuali header
+            const rows = table.querySelectorAll('tbody tr');
+            
+            rows.forEach(row => {
+                const cols = row.querySelectorAll('td');
+                const name = cols[1].innerText;
+                const nominal = cols[2].innerText;
+                outputText += `${name} ${nominal}\n`;
+            });
+
+            // Salin text
+            navigator.clipboard.writeText(outputText).then(() => {
+                showToast("✅ Hasil berhasil disalin ke clipboard!");
+            }).catch(err => {
+                showToast("❌ Gagal menyalin.", "#ff758c");
+            });
+        }
+
+        // Fungsi Menampilkan Toast (Pengganti Alert)
+        function showToast(message, color) {
+            const toast = document.getElementById('toast');
+            const msgSpan = document.getElementById('toastMessage');
+            
+            msgSpan.innerText = message;
+            if(color) toast.style.background = color;
+            else toast.style.background = "#fff";
+
+            toast.classList.add('show');
+
+            // Hilangkan toast setelah 3 detik
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
