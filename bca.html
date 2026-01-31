@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shortcut Mutasi BCA (Akurat)</title>
+    <title>Shortcut Mutasi BCA (Final)</title>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
     
     <style>
@@ -179,7 +179,7 @@
 
             <div class="input-area">
                 <label class="input-label">Tempel Teks Mutasi BCA (M-BCA / Statement):</label>
-                <textarea id="input-BCA" placeholder="22/01/2026&#10;TRSF E-BANKING CR&#10;20000.00&#10;ELSA NUR LAELA SAR&#10;0000..."></textarea>
+                <textarea id="input-BCA" placeholder="PEND&#10;TRSF E-BANKING CR&#10;20000.00&#10;M RANGGA PANGESTU&#10;0000..."></textarea>
             </div>
 
             <button class="btn-copy" id="btnCopy-BCA" onclick="copyResult('BCA')">📋 Salin Hasil BCA</button>
@@ -280,14 +280,14 @@
             if (bankId === 'BCA') {
                 const lines = inputVal.split('\n');
                 
-                // Helper: Cek apakah baris adalah nominal mentah
+                // Helper: Cek apakah baris adalah nominal mentah (contoh: 20000.00 atau 74,541.08)
                 const isAmount = (str) => {
                     return /^\d{1,3}([.,]\d{3})*([.,]\d{2})?$/.test(str.trim());
                 };
 
                 // Helper: Format Nominal Baru (20000.00 -> 20,000)
                 const formatAmount = (str) => {
-                    // 1. Hapus koma ribuan input jika ada
+                    // 1. Hapus koma ribuan input jika ada (misal 1,000.00 -> 1000.00)
                     let clean = str.replace(/,/g, '');
                     
                     // 2. Hapus .00 di belakang (desimal) agar jadi integer
@@ -313,7 +313,7 @@
                         
                         // Validasi Nama:
                         // 1. Tidak boleh kosong.
-                        // 2. Tidak boleh angka lagi.
+                        // 2. Tidak boleh angka lagi (bukan saldo berturut-turut).
                         // 3. Tidak boleh kata-kata batal (0000, CR, DB).
                         if (nextLine && 
 !isAmount(nextLine)
