@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shortcut Mutasi BCA (Akurat)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #ff7eb3;
+            --secondary: #ff758c;
+            --accent: #7afcff;
+            --dark-bg: #2d1b2e;
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text-color: #ffffff;
+            --shadow: 0 8px 25px rgba(0,0,0,0.4);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: radial-gradient(circle at 50% 130%, #5a2c50, #2d1b2e, #110815);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+            color: var(--text-color);
+            padding: 20px;
+        }
+
+        .bg-particles {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: radial-gradient(var(--glass) 1px, transparent 1px);
+            background-size: 20px 20px; opacity: 0.3; z-index: -1;
+        }
+
+        /* NAVIGATION */
+        .nav-container {
+            width: 100%; max-width: 800px;
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .nav-btn {
+            flex: 1;
+            padding: 15px 10px;
+            background: rgba(255,255,255,0.05);
+            border: 2px solid var(--glass-border);
+            border-radius: 15px;
+            color: #aaa;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .nav-btn:hover { background: rgba(255,255,255,0.1); transform: translateY(-3px); color: #fff; }
+
+        .nav-btn.active {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: #fff;
+            border-color: transparent;
+            box-shadow: 0 0 20px rgba(255, 117, 140, 0.6);
+            transform: scale(1.05);
+        }
+
+        /* PAGE CONTENT */
+        .page-container {
+            width: 100%; max-width: 800px;
+            background: rgba(40, 20, 40, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            padding: 2rem;
+            position: relative;
+            min-height: 400px;
+            animation: fadeInPage 0.5s ease;
+        }
+
+        @keyframes fadeInPage { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+
+        .page-section { display: none; }
+        .page-section.active { display: block; }
+
+        header { text-align: center; margin-bottom: 2rem; }
+        h2 { font-family: 'Fredoka'; font-size: 2rem; color: var(--accent); text-shadow: 0 0 10px rgba(122, 252, 255, 0.5); }
+        .status-text { font-size: 0.9rem; color: #ccc; margin-top: 5px; }
+
+        /* TABLE */
+        .table-wrapper {
+            background: rgba(0,0,0,0.3);
+            border-radius: 12px; border: 1px solid var(--glass-border);
+            overflow: hidden;
+            display: none; margin-bottom: 1.5rem;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        table { width: 100%; border-collapse: collapse; }
+        th { background: rgba(255, 117, 140, 0.2); padding: 15px; text-align: left; font-family: 'Fredoka'; color: var(--primary); position: sticky; top: 0; }
+        td { padding: 12px 15px; border-bottom: 1px solid var(--glass-border); color: #fff; font-size: 1rem; }
+        tr:last-child td { border-bottom: none; }
+
+        /* INPUT AREA */
+        .input-area {
+            background: rgba(0,0,0,0.2);
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px dashed var(--glass-border);
+            margin-bottom: 1.5rem;
+        }
+        .input-label { display: block; font-size: 0.8rem; color: var(--primary); margin-bottom: 8px; font-weight: 600; }
+        
+        textarea {
+            width: 100%; height: 150px;
+            background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border);
+            border-radius: 8px; color: #ddd; font-family: 'Nunito'; padding: 10px; resize: vertical;
+            font-size: 0.85rem; line-height: 1.4;
+        }
+        textarea:focus { outline: none; border-color: var(--accent); background: rgba(255,255,255,0.1); }
+
+        /* BUTTON COPY */
+        .btn-copy {
+            width: 100%; padding: 15px;
+            background: linear-gradient(90deg, #00f260, #0575E6);
+            border: none; border-radius: 50px; color: #fff;
+            font-family: 'Fredoka'; font-size: 1.2rem; cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3); transition: transform 0.2s;
+            display: none;
+        }
+        .btn-copy:active { transform: scale(0.98); }
+
+        /* TOAST */
+        .toast {
+            position: fixed; bottom: 30px; left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #fff; color: #333; padding: 12px 24px;
+            border-radius: 50px; font-weight: bold; opacity: 0;
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            z-index: 1000; box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+    </style>
+</head>
+<body>
+    <div class="bg-particles"></div>
+
+    <!-- NAVIGASI -->
+    <nav class="nav-container">
+        <button class="nav-btn active" onclick="switchPage('BCA', this)">BCA</button>
+        <button class="nav-btn" onclick="switchPage('myBCA', this)">myBCA</button>
+        <button class="nav-btn" onclick="switchPage('DANA', this)">DANA</button>
+    </nav>
+
+    <!-- HALAMAN BCA -->
+    <div class="page-container">
+        <div id="page-BCA" class="page-section active">
+            <header>
+                <h2>Mutasi BCA (Raw)</h2>
+                <div class="status-text" id="status-BCA">Paste data mentah di bawah...</div>
+            </header>
+
+            <div class="table-wrapper" id="resultArea-BCA">
+                <table>
+                    <thead><tr><th width="10%">No</th><th width="60%">Nama Rekening</th><th width="30%">Nominal</th></tr></thead>
+                    <tbody id="tableBody-BCA"></tbody>
+                </table>
+            </div>
+
+            <div class="input-area">
+                <label class="input-label">Tempel Teks Mutasi BCA (M-BCA / Statement):</label>
+                <textarea id="input-BCA" placeholder="22/01/2026&#10;TRSF E-BANKING CR&#10;20000.00&#10;ELSA NUR LAELA SAR&#10;0000..."></textarea>
+            </div>
+
+            <button class="btn-copy" id="btnCopy-BCA" onclick="copyResult('BCA')">📋 Salin Hasil BCA</button>
+        </div>
+
+        <!-- HALAMAN myBCA -->
+        <div id="page-myBCA" class="page-section">
+            <header>
+                <h2>Mutasi myBCA</h2>
+                <div class="status-text" id="status-myBCA">Klik menu atau Paste teks...</div>
+            </header>
+
+            <div class="table-wrapper" id="resultArea-myBCA">
+                <table>
+                    <thead><tr><th width="10%">No</th><th width="60%">Nama Rekening</th><th width="30%">Nominal</th></tr></thead>
+                    <tbody id="tableBody-myBCA"></tbody>
+                </table>
+            </div>
+
+            <div class="input-area">
+                <label class="input-label">Tempel Teks Mutasi myBCA:</label>
+                <textarea id="input-myBCA" placeholder="Paste teks mutasi myBCA di sini..."></textarea>
+            </div>
+
+            <button class="btn-copy" id="btnCopy-myBCA" onclick="copyResult('myBCA')">📋 Salin Hasil myBCA</button>
+        </div>
+
+        <!-- HALAMAN DANA -->
+        <div id="page-DANA" class="page-section">
+            <header>
+                <h2>Mutasi DANA</h2>
+                <div class="status-text" id="status-DANA">Klik menu atau Paste teks...</div>
+            </header>
+
+            <div class="table-wrapper" id="resultArea-DANA">
+                <table>
+                    <thead><tr><th width="10%">No</th><th width="60%">Nama Rekening</th><th width="30%">Nominal</th></tr></thead>
+                    <tbody id="tableBody-DANA"></tbody>
+                </table>
+            </div>
+
+            <div class="input-area">
+                <label class="input-label">Tempel Teks Mutasi DANA:</label>
+                <textarea id="input-DANA" placeholder="Paste teks mutasi DANA di sini..."></textarea>
+            </div>
+
+            <button class="btn-copy" id="btnCopy-DANA" onclick="copyResult('DANA')">📋 Salin Hasil DANA</button>
+        </div>
+    </div>
+
+    <div id="toast" class="toast">Notifikasi</div>
+
+    <script>
+        // 1. FUNGSI PINDAH HALAMAN
+        async function switchPage(bankId, btnElement) {
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            btnElement.classList.add('active');
+
+            document.querySelectorAll('.page-section').forEach(page => page.classList.remove('active'));
+            document.getElementById(`page-${bankId}`).classList.add('active');
+
+            const statusEl = document.getElementById(`status-${bankId}`);
+            statusEl.innerText = "Membaca clipboard...";
+
+            try {
+                const text = await navigator.clipboard.readText();
+                if (text && text.trim().length > 5) {
+                    document.getElementById(`input-${bankId}`).value = text;
+                    processData(bankId);
+                    statusEl.innerText = "Data otomatis ditemukan!";
+                } else {
+                    throw new Error("Kosong");
+                }
+            } catch (err) {
+                statusEl.innerText = "Silakan paste teks secara manual.";
+                document.getElementById(`input-${bankId}`).focus();
+            }
+        }
+
+        // 2. LOGIKA UTAMA
+        function processData(bankId) {
+            const inputVal = document.getElementById(`input-${bankId}`).value;
+            const tbody = document.getElementById(`tableBody-${bankId}`);
+            const resultArea = document.getElementById(`resultArea-${bankId}`);
+            const copyBtn = document.getElementById(`btnCopy-${bankId}`);
+
+            tbody.innerHTML = '';
+
+            if (!inputVal.trim()) {
+                resultArea.style.display = 'none';
+                copyBtn.style.display = 'none';
+                return;
+            }
+
+            const uniqueResults = new Map();
+
+            // --- LOGIKA KHUSUS BCA (RAW STATEMENT) ---
+            if (bankId === 'BCA') {
+                const lines = inputVal.split('\n');
+                
+                // Helper: Cek apakah baris adalah nominal mentah
+                const isAmount = (str) => {
+                    return /^\d{1,3}([.,]\d{3})*([.,]\d{2})?$/.test(str.trim());
+                };
+
+                // Helper: Format Nominal Baru (20000.00 -> 20,000)
+                const formatAmount = (str) => {
+                    // 1. Hapus koma ribuan input jika ada
+                    let clean = str.replace(/,/g, '');
+                    
+                    // 2. Hapus .00 di belakang (desimal) agar jadi integer
+                    if(clean.endsWith('.00')) {
+                        clean = clean.slice(0, -3);
+                    }
+                    
+                    let num = parseInt(clean);
+                    if (isNaN(num)) return str;
+                    
+                    // 3. Format ulang dengan koma pemisah ribuan (en-US)
+                    return num.toLocaleString('en-US'); 
+                };
+
+                // Loop Parsing: Mencari Pola [Nominal] lalu [Nama]
+                for (let i = 0; i < lines.length; i++) {
+                    let line = lines[i].trim();
+
+                    // Jika baris ini adalah Nominal
+                    if (isAmount(line)) {
+                        // Cek baris SELANJUTNYA (Nama)
+                        let nextLine = lines[i+1] ? lines[i+1].trim() : "";
+                        
+                        // Validasi Nama:
+                        // 1. Tidak boleh kosong.
+                        // 2. Tidak boleh angka lagi.
+                        // 3. Tidak boleh kata-kata batal (0000, CR, DB).
+                        if (nextLine && 
+!isAmount(nextLine)
+ && 
+!(/^(0000|CR|DB|PEND|TUNAI|SETOR|TARIK)$/.test(nextLine))
+) {
+                            // Bersihkan nama (hapus karakter aneh jika ada, lalu UPPERCASE)
+                            let name = nextLine
+                                .replace(/[\/\-]/g, ' ')
+                                .trim()
+                                .toUpperCase();
+                            
+                            if(name) {
+                                uniqueResults.set(name, formatAmount(line));
+                            }
+                        }
+                    }
+                }
+            } 
+            // --- LOGIKA UMUM (myBCA, DANA) ---
+            else {
+                const lines = inputVal.split('\n');
+                const regexAmount = /Rp\s?([\d\.,]+)/i; 
+                const regexName = /(?:diterima\s+dari|transfer\s+dari)\s+([A-Z0-9\s]+?)(?:\s+dengan|\s+di|\s+ke|\s+$)/i;
+
+                lines.forEach(line => {
+                    line = line.trim();
+                    if (!line) return;
+
+                    if (line.includes("Rp") && line.toLowerCase().includes("diterima")) {
+                        const matchAmount = line.match(regexAmount);
+                        const matchName = line.match(regexName);
+
+                        if (matchAmount && matchName) {
+                            let rawAmount = matchAmount[1]; 
+                            let finalAmount = rawAmount.replace(/\./g, ','); 
+                            let rawName = matchName[1].trim();
+                            rawName = rawName.replace(/\s+/g, ' ');
+                            let finalName = rawName.toUpperCase();
+
+                            uniqueResults.set(finalName, finalAmount);
+                        }
+                    }
+                });
+            }
+
+            // RENDER TABEL
+            if (uniqueResults.size > 0) {
+                let index = 1;
+                uniqueResults.forEach((amount, name) => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${index}</td>
+                        <td style="color: var(--accent); text-shadow: 0 0 5px var(--primary);">${name}</td>
+                        <td style="color: #fff; font-family: monospace; font-size: 1.1em;">${amount}</td>
+                    `;
+                    tbody.appendChild(row);
+                    index++;
+                });
+
+                resultArea.style.display = 'block';
+                copyBtn.style.display = 'block';
+            } else {
+                resultArea.style.display = 'none';
+                copyBtn.style.display = 'none';
+            }
+        }
+
+        ['BCA', 'myBCA', 'DANA'].forEach(bank => {
+            document.getElementById(`input-${bank}`).addEventListener('input', function() {
+                processData(bank);
+            });
+        });
+
+        function copyResult(bankId) {
+            const rows = document.querySelectorAll(`#tableBody-${bankId} tr`);
+            let output = "";
+            rows.forEach(row => {
+                const cols = row.querySelectorAll('td');
+                output += `${cols[1].innerText}\t${cols[2].innerText}\n`;
+            });
+            
+            navigator.clipboard.writeText(output).then(() => {
+                showToast(`✅ Data ${bankId} tersimpan!`);
+            });
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 3000);
+        }
+    </script>
+</body>
+</html>
