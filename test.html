@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Shortcut Pemroses Mutasi - Dark Theme (Improved)</title>
+  <style>
+    :root{
+      --bg:#121212; --surface:#1e1e1e; --primary:#00acc1; --accent:#4caf50;
+      --on-surface:#e0e0e0; --muted:#b0b0b0; --border:#444;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; min-height:100vh; display:flex; align-items:flex-start; justify-content:center;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background:var(--bg); color:var(--on-surface); padding:20px;
+    }
+    .container{
+      width:100%; max-width:900px; background:var(--surface); border-radius:12px;
+      padding:28px; border:1px solid var(--border); box-shadow:0 8px 25px rgba(0,0,0,.45);
+    }
+    h1{margin:.0 0 4px 0; font-weight:300; color:var(--on-surface); text-align:center}
+    .subtitle{color:var(--muted); font-size:.95rem; text-align:center; margin:0 0 18px 0}
+    label{display:block; margin:12px 0 8px 0; color:var(--on-surface); font-weight:600}
+    textarea{
+      width:100%; min-height:260px; max-height:45vh; resize:vertical;
+      background:#2a2a2a; color:var(--on-surface); border:1px solid var(--border); padding:14px;
+      border-radius:8px; font-family: 'Courier New', monospace; font-size:14px;
+    }
+    .button-row{display:flex; gap:12px; flex-wrap:wrap; justify-content:center; margin-top:18px}
+    button{
+      background:var(--primary); color:white; border:none; padding:11px 18px; border-radius:8px;
+      font-weight:700; cursor:pointer; letter-spacing:.5px;
+    }
+    button.secondary{background:var(--accent)}
+    button:disabled{opacity:.55; cursor:not-allowed; transform:none}
+    #output{
+      margin-top:18px; background:#262626; border:1px dashed var(--border); padding:16px;
+      border-radius:8px; min-height:120px; font-family: 'Courier New', monospace; color:#9ccc65;
+      white-space:pre-wrap; line-height:1.6; font-size:15px;
+    }
+    .output-header{display:flex; justify-content:space-between; align-items:center; gap:12px}
+    .meta{color:var(--muted); font-size:.95rem}
+    .controls{display:flex; gap:8px; align-items:center}
+    @media (max-width:560px){
+      .button-row{justify-content:stretch}
+      button{width:100%}
+    }
+  </style>
+</head>
+<body>
+  <div class="container" role="main">
+    <h1>⚡ Shortcut Pemroses Mutasi</h1>
+    <p class="subtitle">Paste data mentah, lalu klik "Proses Data". Output bisa disalin atau diunduh CSV.</p>
+
+    <label for="inputData">Data Mutasi Mentah</label>
+    <textarea id="inputData" placeholder="Tempel seluruh teks mutasi Anda di sini..." aria-label="Data mutasi"></textarea>
+
+    <div class="button-row">
+      <button id="processBtn" onclick="processMutasi()">🔄 Proses Data</button>
+      <button id="copyBtn" class="secondary" onclick="copyToClipboard()" disabled>📋 Salin Semua</button>
+      <button id="downloadBtn" class="secondary" onclick="downloadCSV()" disabled>⬇️ Unduh CSV</button>
+      <button id="clearBtn" style="background:#666" onclick="clearAll()">❌ Bersihkan</button>
+    </div>
+
+    <div style="margin-top:14px" class="output-header">
+      <label style="font-weight:600" for="output">Hasil Format</label>
+      <div class="controls">
+        <div id="count" class="meta" aria-live="polite">Belum diproses</div>
+      </div>
+    </div>
+
+    <pre id="output" role="region" aria-live="polite">Hasil akan muncul di sini...</pre>
+  </div>
+
+  <script>
+    // Daftar kata kunci bank (tambah sesuai kebutuhan)
+    const BANK_KEYWORDS = ['BRI','BCA','BNI','MANDIRI','DANA','OVO','GOPAY','PERMATA','CIMB','BTN','MAYBANK','BSI'];
+
+    // Normalisasi spasi & trimming helper
+    function cleanLine(s){ return s ? s.trim().replace(/\s{2,}/g,' ') : '' }
+
+    // Konversi string nominal ke angka 'clean' (tanpa pemisah)
+    function normalizedAmountNumber(raw){
+      if(!raw) return '';
+      // Buang "Rp", spasi, titik/ koma ribuan -> kita deteksi desimal di akhir jika ada
+      const r = raw.replace(/Rp\.?/ig,'').replace(/\s+/g,'');
+      // Jika ada koma atau titik sebagai desimal terakhir (misal 1.234,56 atau 1,234.56):
+      // treat last separator if followed by 1-2 digits as decimal, else remove separators
+      const m = r.match(/^(.*?)([.,])(\d{1,2})$/);
+      if(m){
+        const intPart = m[1].replace(/[.,]/g,'');
+        const decSep = m[2];
+        const decPart = m[3];
+        return intPart + '.' + decPart; // use dot as decimal separator uniformly
+      } else {
+        return r.replace(/[.,]/g,''); // remove all separators
+      }
+    }
+
+    // Mencari nominal pertama yang terlihat seperti jumlah uang
+    function findAmount(lines){
+      const amountRegex = /(?:Rp\.?\s*)?(\d{1,3}(?:[.,]\d{3})*(?:[.,]\d{1,2})?)(?!\S)/i;
+      for(const line of lines){
+        const m = line.match(amountRegex);
+        if(m){
+          const raw = m[1];
+          return {raw: raw, normalized: normalizedAmountNumber(raw)};
+        }
+      }
+      return null;
+    }
+
+    // Mencari nama bank dan kemungkinan nomor rekening/atas nama
+    function findBank(lines){
+      for(let i=0;i<lines.length;i++){
+        const L = lines[i].toUpperCase();
+        for(const key of BANK_KEYWORDS){
+          if(L.includes(key.toUpperCase())){
+            // coba ambil baris berikutnya sebagai nomor/atas nama jika ada
+            const nxt = lines[i+1] ? cleanLine(lines[i+1]) : '';
+            return {bank: cleanLine(lines[i]), account: nxt};
+          }
+        }
+      }
+      return null;
+    }
+
+    // Mencari nama pengirim menggunakan pola umum
+    function findSender(lines){
+      const joined = lines.join(' | ');
+      // Pola umum: "transfer dari NAMA", "telah diterima dari NAMA", "dari NAMA dengan", "oleh NAMA"
+      const patterns = [
+        /transfer\s+dari\s+(.+?)(?:\s+via|\s+ke|\s+dengan|$)/i,
+        /telah\s+diterima\s+dari\s+(.+?)(?:\s+via|\s+ke|\s+dengan|$)/i,
+        /dari\s+(.+?)(?:\s+dengan|\s+ke|\s+via|$)/i,
+        /oleh\s+(.+?)(?:\s+pada|\s+ke|\s+via|$)/i,
+        /cr\s+(.+?)\s/i,
+        /pengirim[:\s-]+(.+?)(?:\||$)/i
+      ];
+      for(const re of patterns){
+        const m = joined.match(re);
+        if(m && m[1]) return cleanLine(m[1]);
+      }
+
+      // Jika tidak ditemukan, fallback: cari baris yang tampak seperti nama (alphabet characters, spasi, panjang > 3)
+      for(const line of lines){
+        const t = cleanLine(line);
+        if(t.length > 3 && /^[A-Za-zÀ-ȕ.\-'\s]+$/.test(t) && !/\b(dari|transfer|via|admin|telah|diterima|saldo|cr|nomor|no\.?)\b/i.test(t)){
+          return t;
+        }
+      }
+      return '';
+    }
+
+    // Memecah input menjadi blok transaksi. Gunakan dua baris kosong sebagai pemisah
+    function splitBlocks(text){
+      // Normalisasi: ubah CRLF ke LF
+      const normalized = text.replace(/\r\n/g,'\n');
+      // Pisahkan berdasarkan dua atau lebih baris kosong
+      return normalized.split(/\n\s*\n+/).map(b => b.trim()).filter(Boolean);
+    }
+
+    function processMutasi(){
+      const input = document.getElementById('inputData').value || '';
+      const outputEl = document.getElementById('output');
+      const copyBtn = document.getElementById('copyBtn');
+      const downloadBtn = document.getElementById('downloadBtn');
+      const countEl = document.getElementById('count');
+
+      if(!input.trim()){
+        outputEl.textContent = "Input data kosong. Silakan tempel data mutasi terlebih dahulu.";
+        copyBtn.disabled = true;
+        downloadBtn.disabled = true;
+        countEl.textContent = "Belum diproses";
+        return;
+      }
+
+      const blocks = splitBlocks(input);
+      const results = [];
+
+      for(const block of blocks){
+        const lines = block.split('\n').map(l => l.trim()).filter(l => l !== '');
+        if(lines.length === 0) continue;
+
+        const bankInfo = findBank(lines) || {bank:'', account:''};
+        const amountInfo = findAmount(lines) || {raw:'', normalized:''};
+        const sender = findSender(lines) || '';
+
+        // Jika tidak dapatkan sender via pola, coba ambil nama di baris yang mengandung 'dari' dengan spasi
+        // (sudah ditangani di findSender)
+
+        if(sender && amountInfo.raw && bankInfo.bank){
+          const formatted = `nama ${sender} nominal ${amountInfo.raw} nama bank ${bankInfo.bank}`.trim();
+          results.push({
+            formatted,
+            nama: sender,
+            nominal_raw: amountInfo.raw,
+            nominal_value: amountInfo.normalized,
+            nama_bank: bankInfo.bank,
+            bank_account: bankInfo.account,
+            raw_block: block
+          });
+        }
+      }
+
+      if(results.length === 0){
+        outputEl.textContent = "Tidak ada transaksi yang cocok dengan format. Periksa kembali data mentah Anda atau coba format pemisahan (gunakan blank line antar transaksi).";
+        copyBtn.disabled = true;
+        downloadBtn.disabled = true;
+        countEl.textContent = "0 transaksi";
+        return;
+      }
+
+      // Tampilkan terbalik (terbaru atas)
+      const texts = results.slice().reverse().map(r => r.formatted);
+      outputEl.textContent = texts.join('\n');
+      copyBtn.disabled = false;
+      downloadBtn.disabled = false;
+      countEl.textContent = `${results.length} transaksi ditemukan`;
+      
+      // Simpan hasil terakhir di element untuk dipakai oleh download/copy
+      outputEl._parsedResults = results;
+    }
+
+    function copyToClipboard(){
+      const outputEl = document.getElementById('output');
+      const copyBtn = document.getElementById('copyBtn');
+      const txt = outputEl.textContent || '';
+      if(!txt || txt === 'Hasil akan muncul di sini...') return;
+      navigator.clipboard.writeText(txt).then(() => {
+        const old = copyBtn.textContent;
+        copyBtn.textContent = '✅ Tersalin!';
+        copyBtn.disabled = true;
+        setTimeout(()=>{ copyBtn.textContent = old; copyBtn.disabled = false }, 1800);
+      }).catch(err => {
+        console.error('Gagal salin:', err);
+        alert('Gagal menyalin otomatis. Silakan salin manual dari kotak hasil.');
+      });
+    }
+
+    function downloadCSV(){
+      const outputEl = document.getElementById('output');
+      const results = outputEl._parsedResults || [];
+      if(!results.length) return;
+      // CSV header
+      const rows = [['nama','nominal_raw','nominal_value','nama_bank','bank_account']];
+      for(const r of results){
+        rows.push([r.nama, r.nominal_raw, r.nominal_value, r.nama_bank, r.bank_account || '']);
+      }
+      // Escape CSV sederhana
+      const csv = rows.map(r => r.map(cell => {
+        if(cell === null || cell === undefined) return '';
+        const s = String(cell).replace(/"/g,'""');
+        return /[",\n]/.test(s) ? `"${s}"` : s;
+      }).join(',')).join('\n');
+
+      const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const now = new Date().toISOString().slice(0,19).replace(/:/g,'-');
+      a.download = `mutasi_parsed_${now}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function clearAll(){
+      document.getElementById('inputData').value = '';
+      document.getElementById('output').textContent = 'Hasil akan muncul di sini...';
+      document.getElementById('output')._parsedResults = [];
+      document.getElementById('copyBtn').disabled = true;
+      document.getElementById('downloadBtn').disabled = true;
+      document.getElementById('count').textContent = 'Belum diproses';
+    }
+
+    // keyboard shortcut: Ctrl+Enter to process
+    document.getElementById('inputData').addEventListener('keydown', e => {
+      if((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        processMutasi();
+      }
+    });
+  </script>
+</body>
+</html>
